@@ -1,0 +1,2 @@
+H:\repos\EmailSniffer\x64\Debug\EmailSniffer.exe
+H:\repos\EmailSniffer\x64\Debug\EmailSniffer.pdb
