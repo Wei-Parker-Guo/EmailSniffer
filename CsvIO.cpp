@@ -6,23 +6,7 @@
 #include <algorithm> 
 #include <cctype>
 #include <locale>
-
-std::string& ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
-{
-    str.erase(0, str.find_first_not_of(chars));
-    return str;
-}
-
-std::string& rtrim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
-{
-    str.erase(str.find_last_not_of(chars) + 1);
-    return str;
-}
-
-std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
-{
-    return ltrim(rtrim(str, chars), chars);
-}
+#include "StringOp.h"
 
 void write_csv(std::string filename, std::string colname, set vals) {
     // Make a CSV file with one column of integer values
@@ -46,8 +30,15 @@ void write_csv(std::string filename, std::string colname, set vals) {
     myFile.close();
 }
 
+bool is_number(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
 void write_csv(std::string filename, dataset dataset) {
-    // Make a CSV file with one or more columns of integer values
+    // Make a CSV file with one or more columns of string/integer values
     // Each column of data is represented by the pair <column name, column data>
     //   as std::pair<std::string, std::vector<int>>
     // The dataset is represented as a vector of these columns
@@ -69,7 +60,11 @@ void write_csv(std::string filename, dataset dataset) {
     {
         for (int j = 0; j < dataset.size(); ++j)
         {
-            myFile << dataset.at(j).second.at(i);
+            //if string content then quote with quotes
+            std::string content = dataset.at(j).second.at(i);
+            if (!is_number(content)) content = "\"" + content + "\"";
+            
+            myFile << content;
             if (j != dataset.size() - 1) myFile << ","; // No comma at end of line
         }
         myFile << "\n";
