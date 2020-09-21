@@ -114,7 +114,9 @@ dataset read_csv(std::string filename) {
     {
         std::string sub1 = line.substr(0, line.length() - 3);
         result[0].second.push_back(trim(sub1, "\""));
-        result[1].second.push_back(line.substr(line.length() - 1, line.length() - 1));
+        std::string sub2 = line.substr(line.length() - 1, line.length() - 1);
+        if (std::isdigit(sub2[0])) result[1].second.push_back(sub2);
+        else result[1].second.push_back("-1");
     }
 
     // Close file

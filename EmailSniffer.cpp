@@ -35,7 +35,10 @@ int main() {
 	printf("[Sniffer Config]\nMaximum feature list length: ");
 	int max_feature_n = 10; //default feature list length to 10
 	scanf_s("%d", &max_feature_n, 1);
-	Sniffer* sniffer = new Sniffer(SnifferMode::BAG_OF_WORDS, max_feature_n);
+	printf("\nPlease select word vector mode:\n[0] Bag of Words\n[1] TFIDF\nType index: ");
+	int mode_n;
+	scanf_s("%d", &mode_n, 1);
+	Sniffer* sniffer = new Sniffer((SnifferMode)mode_n, max_feature_n);
 
 	//initialize output dataset
 	dataset out_data = src_dataset;
@@ -49,7 +52,12 @@ int main() {
 	col token_col;
 	token_col.first = "Tokens";
 	out_data.push_back(token_col);
+	col length_col;
+	length_col.first = "TextLength";
+	out_data.push_back(length_col);
 	int non_vec_col_n = out_data.size(); //record fixed col number for later manipulation
+
+	//initialize word vec cols
 	for (int i = 0; i < max_feature_n; i++) {
 		col vec_col;
 		out_data.push_back(vec_col);
@@ -67,6 +75,7 @@ int main() {
 		string concat_tokens = "";
 		for (string token : tokens) concat_tokens = concat_tokens + " " + token;
 		out_data[2].second.push_back(concat_tokens);
+		out_data[3].second.push_back(std::to_string(text.length()));
 	}
 	//extract features for sniffer after this loop
 	sniffer->extract_features();
@@ -77,7 +86,7 @@ int main() {
 		vector<string> tokens;
 		tokenizer->tokenize_with_stopwords_rm(text, tokens);
 		//get result word vector
-		map<string, int> result = sniffer->get_result(tokens);
+		map<string, float> result = sniffer->get_result(tokens);
 
 		//uncomment this to produce verbose outputs
 		//printf("Entry %d vector = [ ", i);
@@ -88,9 +97,9 @@ int main() {
 
 		//attach vector cols to out data
 		int index = 0;
-		for (std::map<string, int>::iterator it = result.begin(); it != result.end(); ++it) {
+		for (std::map<string, float>::iterator it = result.begin(); it != result.end(); ++it) {
 			out_data[index + non_vec_col_n].first = it->first;
-			out_data[index + non_vec_col_n].second.push_back(to_string((int)it->second));
+			out_data[index + non_vec_col_n].second.push_back(to_string(it->second));
 			index += 1;
 		}
 	}
